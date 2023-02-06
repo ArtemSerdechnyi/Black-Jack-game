@@ -61,9 +61,9 @@ class Game:
         match player_type:
             case 'Human':
                 human_count = int(input('Write, human players count: '))
-                for _ in range(human_count):
-                    # name = input('Write name player: ')
-                    name = 'test'
+                for num in range(1, human_count + 1):
+                    # name = input(f'Write name player{num}: ')
+                    name = 'test'  # del this when finished
                     h = Human(name=name)
                     self.human_plrs.append(h)
             case 'Bot':
