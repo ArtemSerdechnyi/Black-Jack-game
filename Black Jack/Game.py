@@ -1,4 +1,4 @@
-from Player import Bot,Human,Dealer
+from Player import Bot, Human, Dealer
 from Deck import Deck
 from typing import Type
 
@@ -14,28 +14,24 @@ class Game:
     def print_card(self, player_type):
         match player_type:
             case 'Dealer':
-                print('Dealer card: ',end='')
+                print('Dealer card: ', end='')
 
                 for ind, card in enumerate(self.dlr.cards):
                     if not ind:
                         if card.rank == 'A' or card.rank == '10':
                             print(card.rank, card.suit, sep='', end=', ')
                             continue
-                        print(card.rank, card.suit,sep='')
+                        print(card.rank, card.suit, sep='')
                         break
                     elif self.dlr.hand_value() == 21:
                         print(card.rank, card.suit)
 
-
-
-                    print(card.rank,card.suit, sep='')
+                    print(card.rank, card.suit, sep='')
 
             case 'Human':
                 pass
 
-
-
-    def get_card_for_player(self,player_type):
+    def get_card_for_player(self, player_type):
         match player_type:
             case 'Human':
                 for human in self.human_plrs:
@@ -46,8 +42,7 @@ class Game:
             case 'Dealer':
                 self.dlr.get_number_of_cards(deck_inst=self.deck_inst, number_of_cards=2)
 
-
-    def get_bet(self,player_type):
+    def get_bet(self, player_type):
         match player_type:
             case 'Human':
                 for human in self.human_plrs:
@@ -61,8 +56,6 @@ class Game:
         d = Deck()
         d.create_deck()
         self.deck_inst = d
-
-
 
     def gnrt_player(self, player_type):
         match player_type:
@@ -82,7 +75,6 @@ class Game:
             case 'Dealer':
                 self.dlr = Dealer(name='Dealer')
 
-
     def start_game(self):
         self.gnrt_player(player_type='Human')
         self.gnrt_player(player_type='Bot')
@@ -96,17 +88,4 @@ class Game:
         self.get_card_for_player(player_type='Human')
         self.get_card_for_player(player_type='Bot')
 
-
-
         # self.print_card(player_type='Dealer')
-
-
-
-
-
-
-
-
-
-
-

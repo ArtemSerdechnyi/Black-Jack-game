@@ -5,7 +5,7 @@ from typing import Union
 
 
 class Card:
-    def __init__(self, card:dict):
+    def __init__(self, card: dict):
         self.rank: str | int = card.get('rank')
         self.suit: str = card.get('suit')
 
@@ -13,16 +13,16 @@ class Card:
         if isinstance(self.rank, int):
             return int(self.rank)
         elif self.rank == 'A':
-            return 1,11
+            return 1, 11
         elif isinstance(self.rank, str):
             return 10
 
 
-class Deck():
+class Deck:
 
     def __init__(self):
         self.ranks: list = ranks
-        self.suits= suits.values()
+        self.suits = suits.values()
         self.deck: list[Card, ...] = []
         self.deck_count = int(input('Deck count: '))
 
