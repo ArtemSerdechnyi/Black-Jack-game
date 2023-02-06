@@ -15,19 +15,17 @@ class Game:
         match player_type:
             case 'Dealer':
                 print('Dealer card: ', end='')
-
                 for ind, card in enumerate(self.dlr.cards):
                     if not ind:
                         if card.rank == 'A' or card.rank == '10':
                             print(card.rank, card.suit, sep='', end=', ')
                             continue
-                        print(card.rank, card.suit, sep='')
+                        print(f'{card.rank}{card.suit}, and one card is face down. ')
                         break
                     elif self.dlr.hand_value() == 21:
-                        print(card.rank, card.suit)
-
-                    print(card.rank, card.suit, sep='')
-
+                        print(card.rank, card.suit, sep='')
+                    else:
+                        print('and one card is face down.')
             case 'Human':
                 pass
 
@@ -88,4 +86,5 @@ class Game:
         self.get_card_for_player(player_type='Human')
         self.get_card_for_player(player_type='Bot')
 
-        # self.print_card(player_type='Dealer')
+        self.print_card(player_type='Dealer')
+
