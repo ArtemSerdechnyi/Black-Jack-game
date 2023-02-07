@@ -1,7 +1,6 @@
 from config import suits, ranks
 from itertools import product
 from random import shuffle
-from typing import Union
 
 
 class Card:
@@ -9,13 +8,13 @@ class Card:
         self.rank: str | int = card.get('rank')
         self.suit: str = card.get('suit')
 
-    def get_card_value(self):
+    def get_card_value(self) -> tuple[float, ...]:
         if isinstance(self.rank, int):
-            return int(self.rank)
+            return float(self.rank),
         elif self.rank == 'A':
-            return 1, 11
+            return 1.0, 11.0
         elif isinstance(self.rank, str):
-            return 10
+            return 10.0,
 
 
 class Deck:
@@ -23,7 +22,7 @@ class Deck:
     def __init__(self):
         self.ranks: list = ranks
         self.suits = suits.values()
-        self.deck: list[Card, ...] = []
+        self.deck: list[Card] = []
         self.deck_count = int(input('Deck count: '))
 
     def create_deck(self):

@@ -1,6 +1,5 @@
-from Player import Bot, Human, Dealer
+from Player import Player, Bot, Human, Dealer
 from Deck import Deck
-from typing import Type
 
 
 class Game:
@@ -10,6 +9,17 @@ class Game:
         self.bot_plrs: list[Bot] = []
         self.dlr: Dealer
         self.deck_inst: Deck
+
+    def player_move(self, player_inst: Player, choose: str):
+        match choose:
+            case 'hit':
+                player_inst.get_number_of_cards(deck_inst=self.deck_inst, number_of_cards=1)
+            case 'stand':
+                pass
+            case 'double':
+                pass
+            case 'surrender':
+                pass
 
     def print_card(self, player_type):
         match player_type:
@@ -23,11 +33,25 @@ class Game:
                         print(f'{card.rank}{card.suit}, and one card is face down. ')
                         break
                     elif self.dlr.hand_value() == 21:
-                        print(card.rank, card.suit, sep='')
+                        print(card.rank, card.suit, sep='', end=' BlACK JACK!')
                     else:
                         print('and one card is face down.')
             case 'Human':
-                pass
+                for human in self.human_plrs:
+                    print(f'{human.name} card: ', end='')
+                    for card in human.cards:
+                        print(card.rank, card.suit, sep='', end=' ')
+                    print()
+                    if self.dlr.hand_value() == 21:
+                        pass
+                    else:
+                        while True:
+                            choose = {'hit', 'stand', 'double', 'surrender'}
+                            human_choose = input('Choose actions: (hit, stand, double, surrender)')
+                            if human_choose in choose:
+                                break
+                            else:
+                                print('Invalid choice! Try again.')
 
     def get_card_for_player(self, player_type):
         match player_type:
@@ -60,8 +84,8 @@ class Game:
             case 'Human':
                 human_count = int(input('Write, human players count: '))
                 for num in range(1, human_count + 1):
-                    # name = input(f'Write name player{num}: ')
-                    name = 'test'  # del this when finished
+                    # name = input(f'Write name player{num}: ') # do this when finished
+                    name = f'test{num}'  # del this when finished
                     h = Human(name=name)
                     self.human_plrs.append(h)
             case 'Bot':
@@ -87,4 +111,4 @@ class Game:
         self.get_card_for_player(player_type='Bot')
 
         self.print_card(player_type='Dealer')
-
+        self.print_card(player_type='Human')
