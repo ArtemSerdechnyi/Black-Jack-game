@@ -7,7 +7,9 @@ if __name__ == '__main__':
 
 
     start = input('Start the game?(yes/not)\n')
+    # todo Exceptions
     while start == 'yes':
         start_game()
         start = input('Play again?(yes/not)\n')
+        # todo Exceptions
     exit(1)

@@ -1,4 +1,4 @@
-from Player import Player, Bot, Human, Dealer
+from Player import Bot, Human, Dealer
 from Deck import Deck
 
 
@@ -10,14 +10,23 @@ class Game:
         self.dlr: Dealer
         self.deck_inst: Deck
 
-    def player_move(self, player_inst: Player, choose: str):
+    def player_move(self, player: Human | Dealer | Bot, choose: str):
         match choose:
             case 'hit':
-                player_inst.get_number_of_cards(deck_inst=self.deck_inst, number_of_cards=1)
+                player.get_number_of_cards(deck_inst=self.deck_inst, number_of_cards=1)
+                if player.blackjack_check():
+                    print(f'{player}, Black Jack')
+                    # todo reward
             case 'stand':
                 pass
             case 'double':
-                pass
+                if player.money - player.bet < 0:
+                    print('Not enough money to double! Try again:')
+                    choose = player.get_human_choose()
+                    self.player_move(player=player, choose=choose)
+
+                else:
+                    player.double_bet()
             case 'surrender':
                 pass
 
@@ -28,30 +37,26 @@ class Game:
                 for ind, card in enumerate(self.dlr.cards):
                     if not ind:
                         if card.rank == 'A' or card.rank == '10':
-                            print(card.rank, card.suit, sep='', end=', ')
+                            print(card, end=', ')
                             continue
-                        print(f'{card.rank}{card.suit}, and one card is face down. ')
+                        print(f'{card}, and one card is face down. ')
                         break
-                    elif self.dlr.hand_value() == 21:
-                        print(card.rank, card.suit, sep='', end=' BlACK JACK!')
+                    elif self.dlr.blackjack_check():
+                        print(card, end=' BlACK JACK!')
                     else:
                         print('and one card is face down.')
             case 'Human':
                 for human in self.human_plrs:
-                    print(f'{human.name} card: ', end='')
+                    print(f'{human} card: ', end='')
                     for card in human.cards:
-                        print(card.rank, card.suit, sep='', end=' ')
+                        print(card, end=' ')
                     print()
-                    if self.dlr.hand_value() == 21:
-                        pass
+                    if self.dlr.blackjack_check():
+                        print(f'{human}, Black Jack')
+                        # todo reward
                     else:
-                        while True:
-                            choose = {'hit', 'stand', 'double', 'surrender'}
-                            human_choose = input('Choose actions: (hit, stand, double, surrender)')
-                            if human_choose in choose:
-                                break
-                            else:
-                                print('Invalid choice! Try again.')
+                        choose: str = human.get_human_choose()
+                        self.player_move(player=human, choose=choose)
 
     def get_card_for_player(self, player_type):
         match player_type:
@@ -83,13 +88,16 @@ class Game:
         match player_type:
             case 'Human':
                 human_count = int(input('Write, human players count: '))
+                # todo Exceptions
                 for num in range(1, human_count + 1):
                     # name = input(f'Write name player{num}: ') # do this when finished
                     name = f'test{num}'  # del this when finished
+                    # todo Exceptions
                     h = Human(name=name)
                     self.human_plrs.append(h)
             case 'Bot':
                 bot_count = int(input('Write, bot players count: '))
+                # todo Exceptions
                 for num in range(1, bot_count + 1):
                     name = f'Bot{num}'
                     b = Bot(name=name)
@@ -103,8 +111,8 @@ class Game:
         self.gnrt_player(player_type='Dealer')
         self.gnrt_deck()
 
-        # self.get_bet(player_type='Human')
-        # self.get_bet(player_type='Bot')
+        self.get_bet(player_type='Human')
+        self.get_bet(player_type='Bot')
 
         self.get_card_for_player(player_type='Dealer')
         self.get_card_for_player(player_type='Human')

@@ -8,6 +8,9 @@ class Card:
         self.rank: str | int = card.get('rank')
         self.suit: str = card.get('suit')
 
+    def __str__(self) -> str:
+        return f'{self.rank}{self.suit}'
+
     def get_card_value(self) -> tuple[float, ...]:
         if isinstance(self.rank, int):
             return float(self.rank),

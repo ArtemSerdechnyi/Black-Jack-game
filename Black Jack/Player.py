@@ -1,8 +1,8 @@
 import abc
 from Deck import Deck, Card
 from random import randint
-from typing import Type, Iterator
-from itertools import product, tee
+from typing import Iterator
+from itertools import product
 
 
 class Player(abc.ABC):
@@ -11,6 +11,9 @@ class Player(abc.ABC):
         self.name: str = name
         self.cards: list[Card] = []
         self.money: float = 100.0
+
+    def __str__(self) -> str:
+        return self.name
 
     def get_number_of_cards(self, deck_inst: Deck, number_of_cards: int) -> None:
         for _ in range(number_of_cards):
@@ -27,19 +30,45 @@ class Player(abc.ABC):
         else:
             return max(sum_each_version)
 
+    @abc.abstractmethod
+    def place_bet(self):
+        pass
+
+    def blackjack_check(self) -> bool:
+        if self.hand_value() == 21:
+            return True
+        else:
+            return False
+
 
 class Human(Player):
 
     def place_bet(self):
-        bet = float(input(f'{self.name} place your bet: '))
-        self.money -= bet
+        self.bet = float(input(f'{self.name} place your bet: '))  # todo Exceptions
+        self.money -= self.bet
+
+    def get_human_choose(self) -> str:
+        while True:
+            choose: set[str] = {'hit', 'stand', 'double', 'surrender'}
+            human_choose: str = input(f'{self.name} choose actions (hit, stand, double, surrender): ')
+            if human_choose in choose:
+                return human_choose
+            else:
+                print('Invalid choice! Try again.')
+
+    def double_bet(self):
+        self.money -= self.bet
+        self.bet *= 2
 
 
 class Dealer(Player):
 
     def __init__(self, name):
         super().__init__(name)
-        self.money = float('inf')
+        self._money = float('inf')
+
+    def place_bet(self):
+        pass
 
 
 class Bot(Player):
