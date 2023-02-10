@@ -19,7 +19,6 @@ class Player(ABC):
     def place_bet(self):
         pass
 
-    @abstractmethod
     def print_card(self) -> None:
         print(f'{self} card: ', end='')
         print(*(card for card in self.cards))
@@ -49,31 +48,38 @@ class Player(ABC):
 
 
 class Human(Player):
+    def __init__(self, name):
+        super().__init__(name)
+        self.choose: str  # look def get_chose
+        self.bet: int
 
     def place_bet(self) -> None:
-        self.bet = float(input(f'{self.name} place your bet: '))  # todo Exceptions
+        print(f'{self} money: {self.money}')
+        self.bet = int(input(f'{self} place your bet: '))  # todo Exceptions
         self.money -= self.bet
         if self.money < 0:
             print('Not enough money for a bet. Try again.')
             self.money += self.bet
             self.place_bet()
 
-    def print_card(self) -> None:
-        super().print_card()
-
-    def get_human_choose(self) -> str:
-        while True:
-            choose: set[str] = {'hit', 'stand', 'double', 'surrender'}
-            human_choose: str = input(f'{self.name} choose actions (hit, stand, double, surrender): ')
-            if human_choose in choose:
-                return human_choose
-            else:
-                print('Invalid choice! Try again.')
-
-    def double_bet(self):
-        self.money -= self.bet
-        self.bet *= 2
-
+    # def get_choose(self):
+    #     choose: set[str] = {'hit', 'stand', 'surrender'}
+    #     while not self.choose:
+    #         if len(self.cards) > 2:
+    #             choose: set[str] = {'hit', 'stand'}
+    #         player_choose: str = input(f'{self.name} choose actions {choose}: ')
+    #         if player_choose in choose:
+    #             self.choose = player_choose
+    #         else:
+    #             print('Invalid choice! Try again.')
+    def get_choose(self):
+        hand_value = self.hand_value()
+        if hand_value < 16:
+            self.choose = 'hit'
+        elif hand_value in (16, 17) and len(self.cards) == 2:
+            self.choose = 'surrender'
+        else:
+            self.choose = 'stand'
 
 class Dealer(Player):
 
@@ -82,30 +88,33 @@ class Dealer(Player):
         self.name = 'Dealer'
         self.money = float('inf')
 
-    def place_bet(self) -> NoReturn:
+    def place_bet(*args, **kwargs) -> NoReturn:
         raise Exception('Dealer does not bet')
 
     def print_card(self) -> None:
-        print('Dealer card: ', end='')
-        for ind, card in enumerate(self.cards):
-            if not ind:
-                if card.rank == 'A' or card.rank == '10':
-                    print(card, end=', ')
-                    continue
-                print(f'{card}, and one card is face down. ')
-                break
-            elif self.blackjack_check():
-                print(card, end=' BlACK JACK!')
-            else:
-                print('and one card is face down.')
+        if len(self.cards) == 2:
+            print(f'{self.cards[0]}, and one card is face down. ')
+        else:
+            super().print_card()
 
 
 class Bot(Player):
 
-    def place_bet(self) -> None:
-        bet = randint(1, 10)
-        self.money -= bet
-        print(f'{self.name} betting {bet}')
+    def __init__(self, name):
+        super().__init__(name)
+        self.choose: str  # look def get_chose
+        self.bet: int
 
-    def print_card(self) -> None:
-        super().print_card()
+    def place_bet(self) -> None:
+        self.bet = randint(1, 10)
+        self.money -= self.bet
+        print(f'{self} betting {self.bet}')
+
+    def get_choose(self):
+        hand_value = self.hand_value()
+        if hand_value < 16:
+            self.choose = 'hit'
+        elif hand_value in (16, 17) and len(self.cards) == 2:
+            self.choose = 'surrender'
+        else:
+            self.choose = 'stand'

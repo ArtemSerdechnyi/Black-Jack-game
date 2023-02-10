@@ -34,4 +34,8 @@ class Deck:
         shuffle(self.deck)
 
     def get_card(self):
-        return self.deck.pop()
+        if self.deck:
+            return self.deck.pop()
+        else:
+            print('Deck is over. Get new.')
+            self.create_deck()
