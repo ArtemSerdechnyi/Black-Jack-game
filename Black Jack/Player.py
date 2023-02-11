@@ -10,7 +10,7 @@ class Player(ABC):
     def __init__(self, name):
         self.name: str = name
         self.cards: list[Card] = []
-        self.money: float = 100.0
+        self.money: float = 100
 
     def __str__(self) -> str:
         return self.name
@@ -54,15 +54,21 @@ class Human(Player):
         self.bet: int
 
     def place_bet(self) -> None:
-        print(f'{self} money: {self.money}')
-        self.bet = int(input(f'{self} place your bet: '))  # todo Exceptions
-        self.money -= self.bet
-        if self.money < 0:
-            print('Not enough money for a bet. Try again.')
-            self.money += self.bet
-            self.place_bet()
+        # print(f'{self} money: {self.money}')
+        # self.bet = int(input(f'{self} place your bet: '))  # todo Exceptions
+        # self.money -= self.bet
+        # if self.money < 0:
+        #     print('Not enough money for a bet. Try again.')
+        #     self.money += self.bet
+        #     self.place_bet()
 
-    # def get_choose(self):
+        self.bet = 10
+        self.money -= self.bet
+        print(f'{self} betting {self.bet}')
+
+    # def get_choose(self, dealer_bj: bool):
+    # todo dlr bj
+
     #     choose: set[str] = {'hit', 'stand', 'surrender'}
     #     while not self.choose:
     #         if len(self.cards) > 2:
@@ -72,14 +78,19 @@ class Human(Player):
     #             self.choose = player_choose
     #         else:
     #             print('Invalid choice! Try again.')
-    def get_choose(self):
+    def get_choose(self, dealer_bj: bool):
         hand_value = self.hand_value()
-        if hand_value < 16:
-            self.choose = 'hit'
-        elif hand_value in (16, 17) and len(self.cards) == 2:
-            self.choose = 'surrender'
-        else:
+        if dealer_bj:
+            print('Stand')
             self.choose = 'stand'
+        else:
+            if hand_value < 16:
+                self.choose = 'hit'
+            elif hand_value in (16, 17) and len(self.cards) == 2:
+                self.choose = 'surrender'
+            else:
+                self.choose = 'stand'
+
 
 class Dealer(Player):
 
@@ -87,15 +98,15 @@ class Dealer(Player):
         super().__init__(name)
         self.name = 'Dealer'
         self.money = float('inf')
+        self.firs_card: Card
 
     def place_bet(*args, **kwargs) -> NoReturn:
         raise Exception('Dealer does not bet')
 
-    def print_card(self) -> None:
-        if len(self.cards) == 2:
-            print(f'{self.cards[0]}, and one card is face down. ')
-        else:
-            super().print_card()
+    def get_number_of_cards(self, deck_inst: Deck,
+                            number_of_cards: int) -> None:
+        super().get_number_of_cards(deck_inst, number_of_cards)
+        self.firs_card: Card = self.cards[0]
 
 
 class Bot(Player):
@@ -110,11 +121,15 @@ class Bot(Player):
         self.money -= self.bet
         print(f'{self} betting {self.bet}')
 
-    def get_choose(self):
+    def get_choose(self, dealer_bj: bool):
         hand_value = self.hand_value()
-        if hand_value < 16:
-            self.choose = 'hit'
-        elif hand_value in (16, 17) and len(self.cards) == 2:
-            self.choose = 'surrender'
-        else:
+        if dealer_bj:
+            print('Stand')
             self.choose = 'stand'
+        else:
+            if hand_value < 16:
+                self.choose = 'hit'
+            elif hand_value in (16, 17) and len(self.cards) == 2:
+                self.choose = 'surrender'
+            else:
+                self.choose = 'stand'

@@ -4,6 +4,7 @@ if __name__ == '__main__':
     def start_game():
         g = Game()
         g.start_game()
+        print('Game the end.')
 
 
     start = input('Start the game?(yes/not)\n')

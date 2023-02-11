@@ -39,3 +39,4 @@ class Deck:
         else:
             print('Deck is over. Get new.')
             self.create_deck()
+            return self.deck.pop()
