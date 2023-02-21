@@ -142,7 +142,6 @@ class Game:
                                     print("Try again.")
                     case Bot() as bot:
                         bot.print_card()
-                        # todo
 
         def give_cards_to_players(self, players_or_dealer: list[Player] | Dealer):
             if isinstance(players_or_dealer, list):
@@ -154,9 +153,13 @@ class Game:
                                                       number_of_cards=2)
 
         @staticmethod
-        def create_bet_players(players: list[Player]):
+        def create_bet_players(players: list[Human | Bot]):
             for player in players:
                 player.place_bet()
+
+        # def apply_method(self, players: list[Human | Bot | Dealer], method):
+        #     for player in players:
+        #         player.method()
 
         def game_round(self, humans: list[Human], bots: list[Bot], dealer: Dealer):
             self.create_bet_players(players=humans)
@@ -185,12 +188,6 @@ class Game:
             if player.money < 1:
                 print(f'{player} out of money')
                 Game.Round.remove_player(players=players, player=player)
-
-    # @staticmethod
-    # def call_method_on_each_player(players: list[Player], methode):
-    #     for player in players:
-    #         player.methode()
-    #         print(player.print_card())
 
     def gnrt_deck(self):
         d = Deck()

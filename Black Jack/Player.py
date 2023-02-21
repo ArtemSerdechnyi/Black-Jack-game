@@ -5,6 +5,25 @@ from typing import Iterator, NoReturn
 from itertools import product
 
 
+class ActivePlayer(ABC):
+    qwe = 100
+
+    @abstractmethod
+    def place_bet(self) -> None:
+        pass
+        # # print(f'{self} money: {self.money}')
+        # # self.bet = int(input(f'{self} place your bet: '))  # todo Exceptions
+        # # self.money -= self.bet
+        # # if self.money < 0:
+        # #     print('Not enough money for a bet. Try again.')
+        # #     self.money += self.bet
+        # #     self.place_bet()
+        #
+        # self.bet = 10
+        # self.money -= self.bet
+        # print(f'{self} betting {self.bet}')
+
+
 class Player(ABC):
 
     def __init__(self, name):
@@ -15,22 +34,16 @@ class Player(ABC):
     def __str__(self) -> str:
         return self.name
 
-    @abstractmethod
-    def place_bet(self):
-        pass
-
     def print_card(self) -> None:
-        print(f'{self} card: ', end='')
-        print(*(card for card in self.cards))
+        print(f'{self} card: ', *(card for card in self.cards))
 
     def get_number_of_cards(self,
                             deck_inst: Deck,
                             number_of_cards: int) -> None:
-        for _ in range(number_of_cards):
-            self.cards.append(deck_inst.get_card())
+        self.cards.extend([deck_inst.get_card() for _ in range(number_of_cards)])
 
     def hand_value(self) -> int:
-        value_list: Iterator[tuple[float, ...]] = map(
+        value_list: Iterator[tuple[float]] = map(
             lambda card: card.get_card_value(), self.cards
         )
         sum_each_version = tuple(map(sum, product(*value_list)))
@@ -41,13 +54,10 @@ class Player(ABC):
             return max(sum_each_version)
 
     def blackjack_check(self) -> bool:
-        if self.hand_value() == 21:
-            return True
-        else:
-            return False
+        return self.hand_value() == 21
 
 
-class Human(Player):
+class Human(Player, ActivePlayer):
     def __init__(self, name):
         super().__init__(name)
         self.choose: str  # look def get_chose
@@ -61,7 +71,6 @@ class Human(Player):
         #     print('Not enough money for a bet. Try again.')
         #     self.money += self.bet
         #     self.place_bet()
-
         self.bet = 10
         self.money -= self.bet
         print(f'{self} betting {self.bet}')
@@ -97,7 +106,7 @@ class Dealer(Player):
     def __init__(self, name):
         super().__init__(name)
         self.name = 'Dealer'
-        self.money = float('inf')
+        del self.money
         self.firs_card: Card
 
     def place_bet(*args, **kwargs) -> NoReturn:
@@ -109,7 +118,7 @@ class Dealer(Player):
         self.firs_card: Card = self.cards[0]
 
 
-class Bot(Player):
+class Bot(Player, ActivePlayer):
 
     def __init__(self, name):
         super().__init__(name)

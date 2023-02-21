@@ -4,6 +4,8 @@ from random import shuffle
 
 
 class Card:
+    __slots__ = ('rank', 'suit')
+
     def __init__(self, card: dict):
         self.rank: str | int = card.get('rank')
         self.suit: str = card.get('suit')
@@ -21,6 +23,7 @@ class Card:
 
 
 class Deck:
+    __slots__ = ('ranks', 'suits', 'deck', 'deck_count')
 
     def __init__(self):
         self.ranks: list = ranks
