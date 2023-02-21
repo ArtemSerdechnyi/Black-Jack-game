@@ -152,18 +152,22 @@ class Game:
                 players_or_dealer.get_number_of_cards(deck_inst=self.deck_inst,
                                                       number_of_cards=2)
 
-        @staticmethod
-        def create_bet_players(players: list[Human | Bot]):
-            for player in players:
-                player.place_bet()
-
-        # def apply_method(self, players: list[Human | Bot | Dealer], method):
+        # @staticmethod
+        # def create_bet_players(players: list[Human | Bot]):
         #     for player in players:
-        #         player.method()
+        #         player.place_bet()
+
+        @staticmethod
+        def apply_method(players: list[Human | Bot | Dealer], method):
+            for player in players:
+                method(self=player)
 
         def game_round(self, humans: list[Human], bots: list[Bot], dealer: Dealer):
-            self.create_bet_players(players=humans)
-            self.create_bet_players(players=bots)
+            # self.create_bet_players(players=humans)
+            # self.create_bet_players(players=bots)
+            self.apply_method(players=humans, method=Human.place_bet)
+            self.apply_method(players=bots, method=Bot.place_bet)
+            # self.apply_method(players=humans, method=Human.place_bet(self=Human)
 
             self.give_cards_to_players(players_or_dealer=humans)
             self.give_cards_to_players(players_or_dealer=bots)
