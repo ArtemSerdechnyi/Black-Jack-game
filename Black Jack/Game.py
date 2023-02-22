@@ -1,5 +1,6 @@
 from Player import Bot, Human, Dealer, Player
 from Deck import Deck
+from typing import Callable
 
 
 class Game:
@@ -143,14 +144,14 @@ class Game:
                     case Bot() as bot:
                         bot.print_card()
 
-        def give_cards_to_players(self, players_or_dealer: list[Player] | Dealer):
-            if isinstance(players_or_dealer, list):
-                for player in players_or_dealer:
-                    player.get_number_of_cards(deck_inst=self.deck_inst,
-                                               number_of_cards=2)
-            else:
-                players_or_dealer.get_number_of_cards(deck_inst=self.deck_inst,
-                                                      number_of_cards=2)
+        # def give_cards_to_players(self, players_or_dealer: list[Player] | Dealer):
+        #     if isinstance(players_or_dealer, list):
+        #         for player in players_or_dealer:
+        #             player.get_number_of_cards(deck_inst=self.deck_inst,
+        #                                        number_of_cards=2)
+        #     else:
+        #         players_or_dealer.get_number_of_cards(deck_inst=self.deck_inst,
+        #                                               number_of_cards=2)
 
         # @staticmethod
         # def create_bet_players(players: list[Human | Bot]):
@@ -158,20 +159,22 @@ class Game:
         #         player.place_bet()
 
         @staticmethod
-        def apply_method(players: list[Human | Bot | Dealer], method):
+        def apply_method(players: list[Human | Bot] | Dealer, method: Callable, **kwargs):
+            if not isinstance(players, list):
+                players = [players]
             for player in players:
-                method(self=player)
+                method(player, **kwargs)
 
         def game_round(self, humans: list[Human], bots: list[Bot], dealer: Dealer):
-            # self.create_bet_players(players=humans)
-            # self.create_bet_players(players=bots)
             self.apply_method(players=humans, method=Human.place_bet)
             self.apply_method(players=bots, method=Bot.place_bet)
-            # self.apply_method(players=humans, method=Human.place_bet(self=Human)
 
-            self.give_cards_to_players(players_or_dealer=humans)
-            self.give_cards_to_players(players_or_dealer=bots)
-            self.give_cards_to_players(players_or_dealer=dealer)
+            self.apply_method(players=humans, method=Human.get_number_of_cards,
+                              deck_inst=self.deck_inst, number_of_cards=2)
+            self.apply_method(players=bots, method=Bot.get_number_of_cards,
+                              deck_inst=self.deck_inst, number_of_cards=2)
+            self.apply_method(players=dealer, method=Dealer.get_number_of_cards,
+                              deck_inst=self.deck_inst, number_of_cards=2)
 
             self.print_card_player(players=[dealer])
             self.print_card_player(players=humans)
@@ -194,9 +197,7 @@ class Game:
                 Game.Round.remove_player(players=players, player=player)
 
     def gnrt_deck(self):
-        d = Deck()
-        d.create_deck()
-        self.deck_inst = d
+        self.deck_inst = Deck()
 
     def gnrt_player(self, player_type):
         match player_type:

@@ -43,7 +43,7 @@ class Player(ABC):
         self.cards.extend([deck_inst.get_card() for _ in range(number_of_cards)])
 
     def hand_value(self) -> int:
-        value_list: Iterator[tuple[float]] = map(
+        value_list: Iterator[tuple[int, ...]] = map(
             lambda card: card.get_card_value(), self.cards
         )
         sum_each_version = tuple(map(sum, product(*value_list)))
