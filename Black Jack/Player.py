@@ -8,6 +8,9 @@ from itertools import product
 class ActivePlayer(ABC):
     qwe = 100
 
+    def __del__(self):
+        print(f"{self} leave the game")
+
     @abstractmethod
     def place_bet(self) -> None:
         pass

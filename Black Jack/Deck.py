@@ -36,14 +36,15 @@ class Deck:
 
     def __new__(cls, *args, **kwargs):
         if cls.__instance is None:
+            print('NEW DECK')
             cls.__instance = super().__new__(cls)
-            cls.__deck_count = int(input('Deck count: '))
-            cls.create_shuffle_deck()
         return cls.__instance
 
-    def __del__(self):
-        Deck.deck = []
-        Deck.__instance = None
+    @classmethod
+    def __init__(cls, deck_count):
+        cls.__deck_count = deck_count
+        cls.create_shuffle_deck()
+
 
     @classmethod
     def create_shuffle_deck(cls) -> None:
@@ -67,7 +68,3 @@ class Deck:
             cls.deck_is_over()
         return cls.deck.pop()
 
-    @classmethod
-    def remove_deck(cls):
-        cls.deck = []
-        cls.__instance = None
