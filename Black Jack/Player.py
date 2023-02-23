@@ -37,15 +37,12 @@ class Player(ABC):
     def print_card(self) -> None:
         print(f'{self} card: ', *(card for card in self.cards))
 
-    def get_number_of_cards(self,
-                            deck_inst: Deck,
-                            number_of_cards: int) -> None:
-        self.cards.extend([deck_inst.get_card() for _ in range(number_of_cards)])
+    def get_number_of_cards(self, number_of_cards: int) -> None:
+        self.cards.extend([Deck.get_card() for _ in range(number_of_cards)])
 
     def hand_value(self) -> int:
         value_list: Iterator[tuple[int, ...]] = map(
-            lambda card: card.get_card_value(), self.cards
-        )
+            lambda card: card.get_card_value(), self.cards)
         sum_each_version = tuple(map(sum, product(*value_list)))
         filtered_version = tuple(filter(lambda value: value <= 21, sum_each_version))
         if filtered_version:
@@ -112,9 +109,8 @@ class Dealer(Player):
     def place_bet(*args, **kwargs) -> NoReturn:
         raise Exception('Dealer does not bet')
 
-    def get_number_of_cards(self, deck_inst: Deck,
-                            number_of_cards: int) -> None:
-        super().get_number_of_cards(deck_inst, number_of_cards)
+    def get_number_of_cards(self, number_of_cards: int) -> None:
+        super().get_number_of_cards(number_of_cards)
         self.firs_card: Card = self.cards[0]
 
 

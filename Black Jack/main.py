@@ -2,8 +2,7 @@ from Game import Game
 
 if __name__ == '__main__':
     def start_game():
-        g = Game()
-        g.start_game()
+        Game().start_game()
         print('Game the end.')
 
 

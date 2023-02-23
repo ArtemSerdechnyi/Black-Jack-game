@@ -1,10 +1,11 @@
+
 from config import suits, ranks
 from itertools import product
 from random import shuffle
 from dataclasses import dataclass
 
 
-@dataclass(slots=True,frozen=True)
+@dataclass(slots=True, frozen=True)
 class Card:
     """A playing card."""
 
@@ -27,29 +28,46 @@ class Card:
 class Deck:
     """A deck of playing cards."""
 
-    __slots__ = ('ranks', 'suits', 'deck', 'deck_count')
+    __instance = None
+    __deck_count: int
+    ranks: list = ranks
+    suits = suits.values()
+    deck: list[Card] = []
 
-    def __init__(self):
-        self.ranks: list = ranks
-        self.suits = suits.values()
-        self.deck: list[Card] = []
-        self.deck_count = int(input('Deck count: '))
-        self.create_shuffle_deck()
+    def __new__(cls, *args, **kwargs):
+        if cls.__instance is None:
+            cls.__instance = super().__new__(cls)
+            cls.__deck_count = int(input('Deck count: '))
+            cls.create_shuffle_deck()
+        return cls.__instance
 
-    def create_shuffle_deck(self) -> None:
+    def __del__(self):
+        Deck.deck = []
+        Deck.__instance = None
+
+    @classmethod
+    def create_shuffle_deck(cls) -> None:
         """Creates a new deck of cards."""
-        for _ in range(self.deck_count):
-            self.deck.extend([Card(**{'rank': card[0], 'suit': card[1]}) for card in product(self.ranks, self.suits)])
-        shuffle(self.deck)
+        for _ in range(cls.__deck_count):
+            cls.deck.extend([Card(**{'rank': card[0], 'suit': card[1]})
+                             for card in product(cls.ranks, cls.suits)])
+        shuffle(cls.deck)
 
-    def deck_is_over(self) -> None:
+    @classmethod
+    def deck_is_over(cls) -> None:
         print('Deck is over. Get new.')
-        self.create_shuffle_deck()
+        cls.create_shuffle_deck()
 
-    def get_card(self) -> Card:
+    @classmethod
+    def get_card(cls) -> Card:
         """Returns a top card from the deck."""
-        if self.deck:
-            return self.deck.pop()
+        if cls.deck:
+            return cls.deck.pop()
         else:
-            self.deck_is_over()
-        return self.deck.pop()
+            cls.deck_is_over()
+        return cls.deck.pop()
+
+    @classmethod
+    def remove_deck(cls):
+        cls.deck = []
+        cls.__instance = None
