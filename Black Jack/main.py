@@ -3,7 +3,6 @@ from Game import Game
 if __name__ == '__main__':
     def start_game():
         Game().start_game()
-        print('Game the end.')
 
 
     start = input('Start the game?(yes/not)\n')

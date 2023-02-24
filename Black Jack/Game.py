@@ -1,6 +1,7 @@
+
 from Player import Bot, Human, Dealer, Player
 from Deck import Deck
-from typing import Callable, Any
+from typing import Callable, Union
 
 
 class Game:
@@ -17,14 +18,13 @@ class Game:
                      bot_plrs: list[Bot],
                      dealer: Dealer,
                      deck_inst: Deck):
-            self.cl = type(self).__name__
             self.human_plrs: list[Human] = human_plrs
             self.bot_plrs: list[Bot] = bot_plrs
             self.dealer: Dealer = dealer
             self.deck_inst: Deck = deck_inst
             self.game_round()
 
-        def remove_player(self: Any, player: Player):
+        def remove_player(self: Union['__Round', 'Game'], player: Player):
             player.cards.clear()
             match player:
                 case Dealer() as dealer:
@@ -36,49 +36,55 @@ class Game:
 
         def hand_analysis(self, player: Human | Bot):
             dealer = self.dealer
-
             bet = player.bet
-            player_hand_value = player.hand_value()
+            player_hand_value = player.hand_value()  # player_hand_value <= 21
             dealer_hand_value = dealer.hand_value()
+            assert player_hand_value <= 21, 'in def hand_analysis player_hand_value must be <=21'
+
+            def player_win_bj():
+                print(f'{player} Blackjack, win {bet * 3 / 2} $')
+                player.money += bet + bet * 3 / 2
+
+            def player_win():
+                print(f'{player}, win {bet * 2} $')
+                player.money += bet + bet
+
+            def player_lost():
+                print(f'{player} lost {bet} $')
+
+            def draw():
+                print(f'Draw. {player} gets {bet} $ back')
+                player.money += bet
+
             player.print_card()
             dealer.print_card()
             print(f'{player} score: {player_hand_value} vs'
                   f' {dealer} score: {dealer_hand_value}')
             if dealer_hand_value > 21:
                 if player_hand_value == 21:
-                    print(f'{player} Blackjack, win {bet * 3 / 2} $')
-                    player.money += bet + bet * 3 / 2
-                    print(f'{player} money: {player.money}')
+                    player_win_bj()
                 elif player_hand_value < 21:
-                    print(f'{player}, win {bet} $')
-                    player.money += bet + bet
-                    print(f'{player} money: {player.money}')
+                    player_win()
             elif dealer_hand_value == 21:
                 if player_hand_value == 21:
-                    print(f'Draw. {player} gets {bet} $ back')
-                    player.money += bet
-                    print(f'{player} money: {player.money}')
+                    draw()
                 else:
-                    print(f'{player} lost {bet} $')
+                    player_lost()
             elif dealer_hand_value < 21:
                 if player_hand_value == 21:
-                    print(f'{player} Blackjack, win {bet * 3 / 2} $')
-                    player.money += bet + bet * 3 / 2
-                    print(f'{player} money: {player.money}')
+                    player_win_bj()
                 elif player_hand_value > dealer_hand_value:
-                    print(f'{player} win {bet * 2} $')
-                    player.money += bet + bet
-                    print(f'{player} money: {player.money}')
+                    player_win()
                 elif player_hand_value < dealer_hand_value:
-                    print(f'{player} lost {bet} $')
+                    player_lost()
                 elif player_hand_value == dealer_hand_value:
-                    print(f'Draw. {player} gets {bet} back')
-                    player.money += bet
-                    print(f'{player} money: {player.money}')
+                    draw()
 
-                self.remove_player(player=player)
+            print(f'{player} money: {player.money}')
+            self.remove_player(player=player)
 
-        def move_dealer(self, dealer: Dealer):
+        @staticmethod
+        def move_dealer(dealer: Dealer):
             if dealer.hand_value() < 16:
                 print("Dealer get the cards: ")
                 while dealer.hand_value() < 17:
@@ -105,7 +111,6 @@ class Game:
                     self.remove_player(player=player)
 
         def choose_move_player(self, player: Human | Bot):
-            # for player in players.copy():
             hand_value: int = player.hand_value()
             if hand_value <= 21:
                 player.get_choose(dealer_bj=self.dealer.blackjack_check())
@@ -122,8 +127,6 @@ class Game:
                         print('Dealer Blackjack')
                         dealer.print_card()
                 case Human() as human:
-                    players: list[Human]
-                    player: Human
                     human.print_card()
                     if human.blackjack_check() and self.dealer.firs_card.rank == 'A':
                         print(f'{human} Blackjack!')
@@ -144,7 +147,7 @@ class Game:
                     bot.print_card()
 
         @staticmethod
-        def apply_method(players: list[Player], method: Callable, **kwargs):
+        def apply_method(players: list[Human | Bot], method: Callable, **kwargs):
             for player in players.copy():
                 method(player, **kwargs)
 
@@ -162,7 +165,7 @@ class Game:
                               number_of_cards=2)
             dealer.get_number_of_cards(number_of_cards=2)
 
-            dealer.print_card()
+            self.print_card_player(player=dealer)
             self.apply_method(players=humans, method=self.print_card_player)
             self.apply_method(players=bots, method=self.print_card_player)
 
@@ -176,19 +179,22 @@ class Game:
             self.apply_method(players=humans, method=self.hand_analysis)
             self.apply_method(players=bots, method=self.hand_analysis)
 
-    def poor_remove(self, players: list[Player]):
-        for player in players.copy():
-            if player.money < 1:
-                print(f'{player} out of money')
-                self.__Round.remove_player(self=self, player=player)  # attention fake self!
+    @staticmethod
+    def endgame():
+        print('Game the end.')
+
+    def poor_remove(self, player: Human | Bot):
+        if player.money < 1:
+            print(f'{player} out of money')
+            self.__Round.remove_player(self=self, player=player)  # attention fake self!
 
     def gnrt_deck(self):
-        while True:
-            deck_count = int(input('Deck count: '))
-            if isinstance(deck_count, int):
-                break
-            print('Deck count be integer. Try again.')
-        self.deck_inst = Deck(deck_count=deck_count)
+        # while True:
+        #     deck_count = int(input('Deck count: '))
+        #     if isinstance(deck_count, int):
+        #         break
+        #     print('Deck count be integer. Try again.')
+        self.deck_inst = Deck()
 
     def gnrt_player(self, player_type):
         match player_type:
@@ -219,6 +225,8 @@ class Game:
                          bot_plrs=self.bot_plrs.copy(),
                          dealer=self.dealer,
                          deck_inst=self.deck_inst)
-            self.poor_remove(players=self.human_plrs)
-            self.poor_remove(players=self.bot_plrs)
+            self.__Round.apply_method(players=self.human_plrs, method=self.poor_remove)
+            self.__Round.apply_method(players=self.bot_plrs, method=self.poor_remove)
             self.__Round.remove_player(self=self, player=self.dealer)  # attention fake self!
+
+        self.endgame()

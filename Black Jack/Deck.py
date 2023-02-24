@@ -1,4 +1,3 @@
-
 from config import suits, ranks
 from itertools import product
 from random import shuffle
@@ -38,16 +37,20 @@ class Deck:
         if cls.__instance is None:
             print('NEW DECK')
             cls.__instance = super().__new__(cls)
+            cls.create_deck()
         return cls.__instance
 
     @classmethod
-    def __init__(cls, deck_count):
-        cls.__deck_count = deck_count
-        cls.create_shuffle_deck()
-
+    def create_deck(cls):
+        while True:
+            cls.__deck_count = int(input('Deck count: '))
+            if isinstance(cls.__deck_count, int):
+                break
+            print('Deck count be integer. Try again.')
+        cls.create_shuffle_decks()
 
     @classmethod
-    def create_shuffle_deck(cls) -> None:
+    def create_shuffle_decks(cls) -> None:
         """Creates a new deck of cards."""
         for _ in range(cls.__deck_count):
             cls.deck.extend([Card(**{'rank': card[0], 'suit': card[1]})
@@ -57,7 +60,7 @@ class Deck:
     @classmethod
     def deck_is_over(cls) -> None:
         print('Deck is over. Get new.')
-        cls.create_shuffle_deck()
+        cls.create_shuffle_decks()
 
     @classmethod
     def get_card(cls) -> Card:
@@ -67,4 +70,3 @@ class Deck:
         else:
             cls.deck_is_over()
         return cls.deck.pop()
-

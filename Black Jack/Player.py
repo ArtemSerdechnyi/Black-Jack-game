@@ -6,7 +6,8 @@ from itertools import product
 
 
 class ActivePlayer(ABC):
-    qwe = 100
+    money: int = 100
+    bet: int
 
     def __del__(self):
         print(f"{self} leave the game")
@@ -32,13 +33,12 @@ class Player(ABC):
     def __init__(self, name):
         self.name: str = name
         self.cards: list[Card] = []
-        self.money: float = 100
 
     def __str__(self) -> str:
         return self.name
 
     def print_card(self) -> None:
-        print(f'{self} card: ', *(card for card in self.cards))
+        print(f'{self} card:', *(card for card in self.cards))
 
     def get_number_of_cards(self, number_of_cards: int) -> None:
         self.cards.extend([Deck.get_card() for _ in range(number_of_cards)])
@@ -106,7 +106,7 @@ class Dealer(Player):
     def __init__(self, name):
         super().__init__(name)
         self.name = 'Dealer'
-        del self.money
+        # del self.money
         self.firs_card: Card
 
     def place_bet(*args, **kwargs) -> NoReturn:
