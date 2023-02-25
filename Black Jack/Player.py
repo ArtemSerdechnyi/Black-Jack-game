@@ -103,10 +103,8 @@ class Human(Player, ActivePlayer):
 
 class Dealer(Player):
 
-    def __init__(self, name):
+    def __init__(self, name='Dealer'):
         super().__init__(name)
-        self.name = 'Dealer'
-        # del self.money
         self.firs_card: Card
 
     def place_bet(*args, **kwargs) -> NoReturn:
@@ -130,7 +128,7 @@ class Bot(Player, ActivePlayer):
         print(f'{self} betting {self.bet}')
 
     def get_choose(self, dealer_bj: bool):
-        hand_value = self.hand_value()
+        hand_value: int = self.hand_value()
         if dealer_bj:
             print('Stand')
             self.choose = 'stand'

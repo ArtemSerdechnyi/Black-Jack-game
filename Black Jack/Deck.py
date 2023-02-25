@@ -41,7 +41,7 @@ class Deck:
         return cls.__instance
 
     @classmethod
-    def create_deck(cls):
+    def create_deck(cls) -> None:
         while True:
             cls.__deck_count = int(input('Deck count: '))
             if isinstance(cls.__deck_count, int):
@@ -70,3 +70,7 @@ class Deck:
         else:
             cls.deck_is_over()
         return cls.deck.pop()
+
+    @classmethod
+    def del_deck(cls) -> None:
+        cls.__instance = None
