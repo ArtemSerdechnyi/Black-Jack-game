@@ -2,6 +2,7 @@ from config import suits, ranks
 from itertools import product
 from random import shuffle
 from dataclasses import dataclass
+from typing import Iterable
 
 
 @dataclass(slots=True, frozen=True)
@@ -30,12 +31,11 @@ class Deck:
     __instance = None
     __deck_count: int
     ranks: list = ranks
-    suits = suits.values()
+    suits: Iterable[str] = suits.values()
     deck: list[Card] = []
 
     def __new__(cls, *args, **kwargs):
         if cls.__instance is None:
-            print('NEW DECK')
             cls.__instance = super().__new__(cls)
             cls.create_deck()
         return cls.__instance

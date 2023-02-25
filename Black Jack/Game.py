@@ -1,4 +1,4 @@
-from Player import Bot, Human, Dealer, Player
+from Player import Bot, Human, Dealer, Player, ActivePlayer
 from Deck import Deck
 from typing import Callable, Union
 
@@ -23,6 +23,10 @@ class Game:
             self.deck_inst: Deck = deck_inst
             self.game_round()
 
+        @staticmethod
+        def round_end():
+            print('Round over.')
+
         def remove_player(self: Union['__Round', 'Game'], player: Player):
             player.cards.clear()
             match player:
@@ -33,66 +37,14 @@ class Game:
                 case Bot() as bot:
                     self.bot_plrs.remove(bot)
 
-        def hand_analysis(self, player: Human | Bot):
-
-            dealer = self.dealer
-            bet = player.bet
-            player_hand_value = player.hand_value()  # player_hand_value <= 21
-            dealer_hand_value = dealer.hand_value()
+        def hand_analysis(self, player: ActivePlayer):
+            dealer: Dealer = self.dealer
+            player_hand_value: int = player.hand_value()  # player_hand_value must be <= 21
             assert player_hand_value <= 21, 'in def hand_analysis player_hand_value must be <=21'
-
-            player.print_card()
-            dealer.print_card()
-
-            def analyzer():
-
-                def printer(comparison_keyword: str):
-                    print(f'{player} score: {player_hand_value} vs'
-                          f' {dealer} score: {dealer_hand_value}')
-
-                    def player_win_bj() -> None:
-                        print(f'{player} Blackjack, win {bet * 3 / 2} $')
-                        player.money += bet + bet * 3 / 2
-
-                    def player_win() -> None:
-                        print(f'{player}, win {bet * 2} $')
-                        player.money += bet + bet
-
-                    def player_lost() -> None:
-                        print(f'{player} lost {bet} $')
-
-                    def draw() -> None:
-                        print(f'Draw. {player} gets {bet} $ back')
-                        player.money += bet
-
-                    keywords = {'win': player_win(), 'win_bj': player_win_bj(),
-                                'lost': player_lost(), 'draw': draw()}
-                    assert comparison_keyword in keywords.keys(), \
-                        f'{comparison_keyword} not in {tuple(keywords.keys())}'
-                    keywords.get(comparison_keyword)
-                    print(f'{player} money: {player.money}')
-
-                if dealer_hand_value > 21:
-                    if player_hand_value == 21:
-                        printer('win_bj')
-                    elif player_hand_value < 21:
-                        printer('win')
-                elif dealer_hand_value == 21:
-                    if player_hand_value == 21:
-                        printer('draw')
-                    else:
-                        printer('lost')
-                elif dealer_hand_value < 21:
-                    if player_hand_value == 21:
-                        printer('win_bj')
-                    elif player_hand_value > dealer_hand_value:
-                        printer('win')
-                    elif player_hand_value < dealer_hand_value:
-                        printer('lost')
-                    elif player_hand_value == dealer_hand_value:
-                        printer('draw')
-
-            analyzer()
+            dealer_hand_value: int = dealer.hand_value()
+            player.analyzer(dealer=self.dealer,
+                            player_hand_value=player_hand_value,
+                            dealer_hand_value=dealer_hand_value)
             self.remove_player(player=player)
 
         @staticmethod
@@ -104,12 +56,12 @@ class Game:
                     print(f'Dealer get {dealer.cards[-1]}')
                 dealer.print_card()
 
-        def move_activation(self, player: Human | Bot) -> None:
+        def move_activation(self, player: ActivePlayer) -> None:
             match player.choose:
                 case 'hit':
                     player.get_number_of_cards(number_of_cards=1)
                     if player.hand_value() > 21:
-                        print(f'{player} lost. Hand value {player.hand_value()}', *player.cards)
+                        print(f'{player} lost. Hand value {player.hand_value()}')
                         self.remove_player(player=player)
                     else:
                         player.get_choose(dealer_bj=self.dealer.blackjack_check())
@@ -130,7 +82,7 @@ class Game:
                 print(f'{player} lose this round: -{player.bet}$')
                 self.remove_player(player=player)
 
-        def print_card_player(self, player: Player) -> None:
+        def showing_dealt_cards(self, player: Player) -> None:
             match player:
                 case Dealer() as dealer:
                     if not dealer.blackjack_check():
@@ -159,7 +111,7 @@ class Game:
                     bot.print_card()
 
         @staticmethod
-        def apply_method(players: list[Human | Bot], method: Callable, **kwargs) -> None:
+        def apply_method(players: list[Human | Bot], method: Callable[..., None], **kwargs) -> None:
             for player in players.copy():
                 method(player, **kwargs)
 
@@ -177,9 +129,9 @@ class Game:
                               number_of_cards=2)
             dealer.get_number_of_cards(number_of_cards=2)
 
-            self.print_card_player(player=dealer)
-            self.apply_method(players=humans, method=self.print_card_player)
-            self.apply_method(players=bots, method=self.print_card_player)
+            self.showing_dealt_cards(player=dealer)
+            self.apply_method(players=humans, method=self.showing_dealt_cards)
+            self.apply_method(players=bots, method=self.showing_dealt_cards)
 
             self.apply_method(players=humans, method=self.choose_move_player)
             self.apply_method(players=bots, method=self.choose_move_player)
@@ -190,6 +142,8 @@ class Game:
 
             self.apply_method(players=humans, method=self.hand_analysis)
             self.apply_method(players=bots, method=self.hand_analysis)
+
+            self.round_end()
 
     @staticmethod
     def endgame():
