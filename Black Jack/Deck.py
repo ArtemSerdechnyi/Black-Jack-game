@@ -1,4 +1,4 @@
-from config import suits, ranks
+from config import SUITS, RANKS
 from itertools import product
 from random import shuffle
 from dataclasses import dataclass
@@ -30,8 +30,8 @@ class Deck:
 
     __instance = None
     __deck_count: int
-    ranks: list = ranks
-    suits: Iterable[str] = suits.values()
+    ranks: list = RANKS
+    suits: Iterable[str] = SUITS.values()
     deck: list[Card] = []
 
     def __new__(cls, *args, **kwargs):

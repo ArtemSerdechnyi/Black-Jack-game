@@ -25,7 +25,7 @@ class Game:
 
         @staticmethod
         def round_end():
-            print('Round over.')
+            print('Round over. -------------------------------------')
 
         def remove_player(self: Union['__Round', 'Game'], player: Player):
             player.cards.clear()
@@ -37,7 +37,8 @@ class Game:
                 case Bot() as bot:
                     self.bot_plrs.remove(bot)
 
-        def hand_analysis(self, player: ActivePlayer):
+        def hand_analysis(self, player: Human | Bot):
+            """Analyzes a player's hand and determines if they won or lost."""
             dealer: Dealer = self.dealer
             player_hand_value: int = player.hand_value()  # player_hand_value must be <= 21
             assert player_hand_value <= 21, 'in def hand_analysis player_hand_value must be <=21'
@@ -45,7 +46,6 @@ class Game:
             player.analyzer(dealer=self.dealer,
                             player_hand_value=player_hand_value,
                             dealer_hand_value=dealer_hand_value)
-            self.remove_player(player=player)
 
         @staticmethod
         def move_dealer(dealer: Dealer) -> None:
@@ -59,25 +59,23 @@ class Game:
         def move_activation(self, player: ActivePlayer) -> None:
             match player.choose:
                 case 'hit':
-                    player.get_number_of_cards(number_of_cards=1)
-                    if player.hand_value() > 21:
-                        print(f'{player} lost. Hand value {player.hand_value()}')
+                    if player.hit(dealer=self.dealer):
                         self.remove_player(player=player)
                     else:
                         player.get_choose(dealer_bj=self.dealer.blackjack_check())
                         self.move_activation(player=player)
                 case 'stand':
-                    print(f'{player} stand.')
+                    player.stand()
                 case 'surrender':
-                    print(f'{player} got half of the bet back.')
-                    player.money += player.bet / 2
-                    print(f'{player} money: {player.money}')
-                    self.remove_player(player=player)
+                    if player.surrender():
+                        self.remove_player(player=player)
 
         def choose_move_player(self, player: Human | Bot) -> None:
             hand_value: int = player.hand_value()
             if hand_value <= 21:
                 player.get_choose(dealer_bj=self.dealer.blackjack_check())
+                if player.choose == 'hit':
+                    self.move_activation(player=player)
             elif hand_value > 21:
                 print(f'{player} lose this round: -{player.bet}$')
                 self.remove_player(player=player)
@@ -85,30 +83,17 @@ class Game:
         def showing_dealt_cards(self, player: Player) -> None:
             match player:
                 case Dealer() as dealer:
-                    if not dealer.blackjack_check():
-                        print(f'{dealer}: {dealer.firs_card}, and one card is face down.')
-                    else:
-                        print('Dealer Blackjack')
-                        dealer.print_card()
+                    dealer._show_dealt_cards()
                 case Human() as human:
-                    human.print_card()
-                    if human.blackjack_check() and self.dealer.firs_card.rank == 'A':
-                        print(f'{human} Blackjack!')
-                        while True:
-                            choice = input(f'{human} you want to take the win 1 to 1 (yes/no): ')
-                            if choice == 'yes':
-                                print(f'{human} win {human.bet * 2} $')
-                                human.money += human.bet * 2
-                                print(f'{human} money {human.money}')
-                                self.remove_player(player=human)
-                                break
-                            elif choice == 'no':
-                                print('Game continues win 3/2 bet')
-                                break
-                            else:
-                                print("Try again.")
+                    player: Human
+                    if human._show_dealt_cards(dealer=self.dealer):
+                        if human.blackjack_check() and not self.dealer.blackjack_check():
+                            human._player_win_bj()
+                            # self.hand_analysis(player=player)
+                        self.remove_player(player=human)
                 case Bot() as bot:
-                    bot.print_card()
+                    if bot._show_dealt_cards(dealer=self.dealer):
+                        self.remove_player(player=bot)
 
         @staticmethod
         def apply_method(players: list[Human | Bot], method: Callable[..., None], **kwargs) -> None:
@@ -136,12 +121,16 @@ class Game:
             self.apply_method(players=humans, method=self.choose_move_player)
             self.apply_method(players=bots, method=self.choose_move_player)
 
+            print('Players decisions.')
             self.apply_method(players=bots, method=self.move_activation)
             self.apply_method(players=humans, method=self.move_activation)
             self.move_dealer(dealer=dealer)
 
             self.apply_method(players=humans, method=self.hand_analysis)
             self.apply_method(players=bots, method=self.hand_analysis)
+
+            self.apply_method(players=humans, method=self.remove_player)
+            self.apply_method(players=bots, method=self.remove_player)
 
             self.round_end()
 
@@ -161,17 +150,32 @@ class Game:
     def gnrt_player(self, player_type):
         match player_type:
             case 'Human':
-                human_count = int(input('Write, human players count: '))
-                # todo Exceptions
+                human_count = 1
+                while True:
+                    try:
+                        human_count = int(input('Write, human players count: '))
+                    except ValueError:
+                        print('You need to enter a int number')
+                        continue
+                    break
                 for num in range(1, human_count + 1):
-                    # name = input(f'Write name player{num}: ') # do this when finished
-                    name = f'test{num}'  # del this when finished
-                    # todo Exceptions
+                    while True:
+                        name = input(f'Write name player{num}: ')
+                        if name.isalpha():
+                            break
+                        print('Name can contain only letters. Try again')
+                    # name = f'test{num}'  # for autogame
                     h = Human(name=name)
                     self.human_plrs.append(h)
             case 'Bot':
-                bot_count = int(input('Write, bot players count: '))
-                # todo Exceptions
+                bot_count = 1
+                while True:
+                    try:
+                        bot_count = int(input('Write, bot players count: '))
+                    except ValueError:
+                        print('You need to enter a int number')
+                        continue
+                    break
                 for num in range(1, bot_count + 1):
                     name = f'Bot{num}'
                     b = Bot(name=name)
